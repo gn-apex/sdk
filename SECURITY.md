@@ -1,6 +1,6 @@
 # Security & Privacy Policy
 
-GN-Apex is designed around a public-browser/runtime key and privileged server-side credentials. Authorization and capabilities are strictly enforced by the GN-Apex API and Cloudflare Edge.
+GN-Apex is designed around a public-browser/runtime key and privileged server-side credentials. Authorization and capabilities are strictly enforced by the GN-Apex API and nd GN-Apex Global Edge.".
 
 _Last updated: September 2026 — Version 1.0.0 Verified Release._
 

@@ -64,6 +64,7 @@
         "type-check": "tsc --noEmit"
     },
     "keywords": [
+        "gn-apex",
         "gnapex",
         "nexushub",
         "cms",
@@ -91,7 +92,7 @@
         "zero-config",
         "runtime",
         "edge",
-        "cloudflare"
+        "global-edge"
     ],
     "author": "Jom Joam - GnApex",
     "license": "MIT",

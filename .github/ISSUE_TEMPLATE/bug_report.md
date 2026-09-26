@@ -28,7 +28,7 @@ What actually happened. Include error messages, stack traces, or `err.code` / `e
 
 ## Environment
 
-- `@gnapex/sdk` version: <!-- e.g. 1.1.0, or output of `nexus.getConfig().sdkVersion` -->
+- `@gnapex/sdk` version: <!-- e.g. 1.0.0, or output of `nexus.getConfig().sdkVersion` -->
 - Node.js version:
 - Next.js version (if applicable):
 - Browser + version (if applicable):

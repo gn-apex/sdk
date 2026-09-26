@@ -527,7 +527,7 @@ nexus.remoteConfig.all();
 ```ts
 nexus.diagnostics();
 // {
-//   version: "1.1.0",
+//   version: "1.0.0",
 //   environment: "production",
 //   online: true,
 //   userAgent: "...",

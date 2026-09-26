@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Documented that GN-Apex/Cloudflare owns cache invalidation by design; `revalidateTime` continues to default to `false`.
+- Documented that GN-Apex Global Edge owns cache invalidation by design; `revalidateTime` continues to default to `false`.
 
 ### Security
 
