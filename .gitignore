@@ -43,6 +43,7 @@ node_modules/
 .npmrc
 
 # --- Package manager artifacts ---
+package.json.seo-patch.json
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
@@ -77,3 +78,37 @@ out/
 
 # --- Misc ---
 *.local
+
+
+
+# ------------------------------------------
+# Local archives
+# ------------------------------------------
+
+*.zip
+*.tar
+*.tar.gz
+
+
+# ------------------------------------------
+# OS files
+# ------------------------------------------
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# ------------------------------------------
+# Local development
+# ------------------------------------------
+
+.DS_Store
+Thumbs.db
+
+.idea/
+.vscode/
+*.swp
+*.swo

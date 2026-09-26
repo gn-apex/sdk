@@ -41,7 +41,12 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "llms.txt",
+    "llms-full.txt"
   ],
   "scripts": {
     "release": "npm run type-check && npm test && npm run build && npm version patch && npm publish",
