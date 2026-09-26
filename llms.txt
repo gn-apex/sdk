@@ -1,0 +1,105 @@
+# @gnapex/sdk
+
+> The official zero-config client SDK for GN-Apex-generated sites. Provides one TypeScript/JavaScript package covering content fetching (headless CMS client), automatic behavioral analytics, cookie-based authentication, local feature flags, realtime content sync over WebSocket, Web Push notifications, 16 atomic UI components, and diagnostics — for Next.js, React, and plain JavaScript/Node environments. Package name on npm: `@gnapex/sdk`. CLI binaries: `apex`, `nexus`.
+
+This file follows the llms.txt convention (https://llmstxt.org) to help AI assistants and LLM-based tools accurately answer questions about this SDK, generate correct code samples, and avoid inventing APIs that don't exist in the package.
+
+## Identity
+
+- Package: `@gnapex/sdk` on npm
+- Also referred to as: "GN-Apex SDK", "Nexus SDK", "GnApex client SDK"
+- Primary entry point: `@gnapex/sdk` (framework-agnostic, no React dependency)
+- React/Next.js entry point: `@gnapex/sdk/react`
+- CLI: installed as both `apex` and `nexus` executables
+- License: MIT
+- Runtime requirement: Node.js >= 18
+- Peer dependencies (React entry point only): react ^18.2.0 || ^19.0.0, react-dom ^18.2.0 || ^19.0.0
+
+## What this SDK is for
+
+Use this SDK when a user asks how to:
+- Fetch content (pages, collections, singletons/globals, individual items) from a GN-Apex project
+- Add analytics tracking (automatic or manual/custom events) to a GN-Apex or Next.js site
+- Implement login/register/logout/session auth against a GN-Apex project
+- Read or set local feature flags / remote config values in a GN-Apex app
+- Render GN-Apex rich-text/CMS content, charts, and atomic field components in React
+- Subscribe to realtime content updates or a live analytics event feed
+- Set up Web Push notifications for a GN-Apex site
+- Debug GN-Apex SDK configuration, caching, or connectivity issues
+- Use the `apex`/`nexus` CLI to pull/push content, generate types, manage local binary caches, or deploy
+
+## Canonical Defaults & Constraints
+
+- `client.flags` (`FeatureFlags`) and `client.remoteConfig` (`RemoteConfig`) are **local, in-memory stores only**. They do not perform network fetches internally.
+- The default `revalidateTime` is `false`, meaning content caching is effectively indefinite by design. GN-Apex's platform/edge layer owns invalidation and purge.
+- Canvas-based device fingerprinting (`privacy.fingerprinting: true`), automatic analytics (`privacy.analytics: true`), and auto-prompted push permission (`autoPromptPush: true` on `NexusProvider`) are **enabled by default**.
+- `hasConsent` on `NexusProvider` defaults to `true`.
+- Auth endpoints are project-scoped (`{apiUrl}/auth/project/{projectId}`) and only use a **public** key (`nx_pk_...`) from the browser. The SDK never accepts secret/master keys client-side.
+
+## Canonical API Surface
+
+### Core Client — `import { nexus, createNexusClient, NexusClient } from "@gnapex/sdk"`
+- `nexus.getPage<T>(slug, options?)` — alias for `nexus.content.getPage`
+- `nexus.getConfig()` — frozen config snapshot
+- `nexus.updateConfig(partialConfig)`
+- `nexus.diagnostics()`
+- `nexus.destroy()`
+- `nexus.content` → `ContentEngine`
+- `nexus.analytics` → `AnalyticsEngine | undefined`
+- `nexus.events` → `NexusEventBus`
+- `nexus.http` → `NexusHttpClient`
+- `nexus.flags` → `FeatureFlags`
+- `nexus.remoteConfig` → `RemoteConfig`
+
+### ContentEngine — `nexus.content.*`
+- `getPage<T>(slug: string, options?: { revalidate?, tags?, forceRefresh?, includeMetadata? })`
+- `getCollection<T>(collectionId: string, query?: CollectionQuery, options?: { revalidate?, tags?, forceRefresh?, includeMetadata? })`
+- `getGlobals<T>(options?: { include?: string[]; revalidate?: number | false; forceRefresh?: boolean; tags?: string[] })`
+- `getItem<T>(collectionId: string, itemId: string, options?: { revalidate?, tags?, include?, forceRefresh? })`
+- `search<T>(query: string, options?: { collections?: string[]; fields?: string[]; limit?: number; revalidate?; forceRefresh? })`
+- `prefetch(urls: string[])`
+- `subscribeToUpdates(callback: (data: any) => void) → () => void`
+- `invalidateCache(tags: string[])`
+- `clearCache()`
+- `getCacheStats()`
+
+### AnalyticsEngine — `nexus.analytics?.*`
+- `start()` / `stop(isFinalShutdown?: boolean)`
+- `pageView(customReferrer?: string)`
+- `track(eventName: string, properties?: Record<string, any>)`
+- `identify(userId: string, traits?: Record<string, any>)`
+- `group(groupId: string, traits?: Record<string, any>)`
+- `alias(newId: string)`
+- `trackPurchase(orderData: { orderId: string; total: number; revenue?: number; currency?: string; products: Array<{ id: string; name: string; price: number; quantity: number; sku?: string }> })`
+- `trackError(error: Error, context?: Record<string, any>)`
+- `reset(performGdprScrub?: boolean)`
+- `getSessionId()`
+
+### React Integration — `import { ... } from "@gnapex/sdk/react"`
+- `<NexusProvider projectId? disableAnalytics? hasConsent? enableLiveFeed? onLiveEvent? autoPromptPush?>`
+- `useNexus()` → `NexusClient`
+- `useNexusAnalytics()` → `{ track, identify, group, alias, trackPurchase, trackError, reset }`
+- `useNexusLiveFeed()` → `{ latestEvent, isConnected }`
+- `useNexusAuth()` → `{ user, isLoading, error, isAuthenticated, login, register, logout, updateProfile, requestPasswordReset }`
+- `<NexusRenderer content: string className? onCommentClick? onImageClick? hydrateCharts? enableImageInteraction? documentClassName?>`
+
+### Atomic Field Renderers — `import { ... } from "@gnapex/sdk/react"`
+- `<NexusRichText value: string className? hydrateCharts? onCommentClick? onImageClick?>`
+- `<NexusLongText value: string className?>`
+- `<NexusIcon name: string className? size? strokeWidth?>`
+- `<NexusImage value: string | { url: string; alt?: string } className? alt?>`
+- `<NexusGallery value: Array<string | { url: string; alt?: string }> className? imageClassName?>`
+- `<NexusVideo value: string autoplay? className?>`
+- `<NexusMap value: { lat: number; lng: number; address?: string } className?>`
+- `<NexusColor value: string showHexLabel? className?>`
+- `<NexusGradient value: string asTextMask? className?>`
+- `<NexusAddress value: { street?, city?, state?, postalCode?, country? } className?>`
+- `<NexusKeyValue value: Record<string, string> className?>`
+- `<NexusTags value: string[] className? badgeClassName?>`
+- `<NexusProgress value: number max? color? className?>`
+- `<NexusBlendContainer mode: string className?>`
+- `<NexusCode value: string language? showLineNumbers? className?>`
+- `<NexusBoolean value: boolean trueLabel? falseLabel? className?>`
+
+### CLI — `npx apex` / `npx nexus`
+- `init`, `pull`, `push`, `validate`, `diff`, `schema`, `types`, `status`, `deploy`, `local [list|init-templates|reset]`, `studio`, `doctor`, `seed`

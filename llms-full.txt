@@ -1,0 +1,2006 @@
+# GN-Apex SDK — Full AI/Developer Reference
+
+> **Status:** Production Reference
+> **Package:** `@gnapex/sdk`
+> **React Entry Point:** `@gnapex/sdk/react`
+> **CLI:** `apex`, `nexus`
+> **License:** MIT
+> **Runtime:** Node.js >= 18
+> **React Peer Dependency:** React 18.2+ or React 19
+
+This document is the canonical developer and AI reference for the GN-Apex SDK.
+
+It describes the public client APIs, React integrations, content engine, analytics engine, UI renderers, HTTP pipeline, push notifications, and CLI toolbelt.
+
+AI coding assistants and developers should use this document as the primary reference when generating or modifying GN-Apex SDK integrations.
+
+---
+
+## Table of Contents
+
+1. [Identity](#identity)
+2. [Installation](#installation)
+3. [Package Entry Points](#package-entry-points)
+4. [Core Client](#core-client)
+5. [Client Configuration](#client-configuration)
+6. [Content Engine API](#content-engine-api)
+
+   * [Get Page](#get-page)
+   * [Get Collection](#get-collection)
+   * [Get Globals](#get-globals)
+   * [Get Item](#get-item)
+   * [Search Content](#search-content)
+7. [Analytics Engine API](#analytics-engine-api)
+
+   * [Automatic Tracking](#automatic-tracking)
+   * [Manual Tracking](#manual-tracking)
+   * [Identify](#identify)
+   * [Group](#group)
+   * [Alias](#alias)
+   * [Purchase Tracking](#purchase-tracking)
+   * [Session Control](#session-control)
+8. [Authentication API](#authentication-api)
+9. [React UI & Field Renderers](#react-ui--field-renderers)
+10. [HTTP Pipeline & Resilience](#http-pipeline--resilience)
+11. [Push Notifications](#push-notifications)
+12. [CLI Toolbelt](#cli-toolbelt)
+13. [CLI Command Reference](#cli-command-reference)
+14. [Production Usage Guidelines](#production-usage-guidelines)
+15. [AI Coding Assistant Rules](#ai-coding-assistant-rules)
+16. [Compatibility](#compatibility)
+17. [License](#license)
+
+---
+
+# Identity
+
+GN-Apex SDK is the TypeScript/JavaScript client runtime for the GN-Apex platform.
+
+The SDK provides a unified interface for applications that consume GN-Apex content, analytics, authentication, UI rendering, notifications, and platform services.
+
+### Package
+
+```text
+@gnapex/sdk
+```
+
+### React Package
+
+```text
+@gnapex/sdk/react
+```
+
+### CLI Binaries
+
+```text
+apex
+nexus
+```
+
+### Runtime
+
+```text
+Node.js >= 18
+```
+
+### License
+
+```text
+MIT
+```
+
+### React Compatibility
+
+```text
+React 18.2+
+React 19
+```
+
+---
+
+# Installation
+
+Install the SDK through your package manager.
+
+```bash
+npm install @gnapex/sdk
+```
+
+Or:
+
+```bash
+pnpm add @gnapex/sdk
+```
+
+Or:
+
+```bash
+yarn add @gnapex/sdk
+```
+
+For React applications, the React entry point is available from:
+
+```ts
+import { useNexusAuth } from "@gnapex/sdk/react";
+```
+
+---
+
+# Package Entry Points
+
+The SDK exposes multiple entry points for different use cases.
+
+## Main SDK
+
+```ts
+import { nexus, createNexusClient } from "@gnapex/sdk";
+```
+
+Use the main package for:
+
+* GN-Apex client access
+* Content APIs
+* Analytics APIs
+* Push notifications
+* Core runtime functionality
+* CLI-related SDK integration
+
+## React SDK
+
+```ts
+import { useNexusAuth } from "@gnapex/sdk/react";
+```
+
+Use the React entry point for:
+
+* Authentication hooks
+* UI renderers
+* Field renderers
+* React-specific integrations
+
+---
+
+# Core Client
+
+The GN-Apex SDK exposes a default zero-configuration client as well as a factory for creating isolated client instances.
+
+## Zero-Configuration Singleton
+
+```ts
+import { nexus } from "@gnapex/sdk";
+
+const page = await nexus.getPage("home");
+```
+
+The singleton client provides convenient access to the GN-Apex platform.
+
+## Isolated Client Instance
+
+```ts
+import { createNexusClient } from "@gnapex/sdk";
+
+const client = createNexusClient({
+  projectId: "project-id",
+  apiKey: "nx_pk_client_key",
+  apiUrl: "https://api.gnapex.com",
+});
+```
+
+Use `createNexusClient()` when an application requires an isolated configuration or multiple GN-Apex clients.
+
+---
+
+# Client Configuration
+
+A client can be configured with the following core values:
+
+```ts
+const client = createNexusClient({
+  projectId: "project-id",
+  apiKey: "nx_pk_client_key",
+  apiUrl: "https://api.gnapex.com",
+});
+```
+
+### Configuration Fields
+
+| Field       | Description                |
+| ----------- | -------------------------- |
+| `projectId` | GN-Apex project identifier |
+| `apiKey`    | Client API key             |
+| `apiUrl`    | GN-Apex API endpoint       |
+
+Example:
+
+```ts
+const client = createNexusClient({
+  projectId: "my-project",
+  apiKey: "nx_pk_client_key",
+  apiUrl: "https://api.gnapex.com",
+});
+```
+
+---
+
+# Content Engine API
+
+The Content Engine provides access to GN-Apex-managed content.
+
+The primary content APIs are:
+
+* `getPage()`
+* `getCollection()`
+* `getGlobals()`
+* `getItem()`
+* `search()`
+
+---
+
+## Get Page
+
+Fetch a page from GN-Apex.
+
+### Convenience API
+
+```ts
+const page = await nexus.getPage("home");
+```
+
+### Content Namespace API
+
+```ts
+const page = await nexus.content.getPage<PageType>("home", {
+  revalidate: 60,
+  tags: ["content_home"],
+  forceRefresh: false,
+  includeMetadata: false,
+});
+```
+
+### Options
+
+```ts
+{
+  revalidate: 60,
+  tags: ["content_home"],
+  forceRefresh: false,
+  includeMetadata: false
+}
+```
+
+### Options Description
+
+| Option            | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `revalidate`      | Revalidation interval in seconds, or `false` |
+| `tags`            | Cache/content tags                           |
+| `forceRefresh`    | Forces a fresh content request               |
+| `includeMetadata` | Includes content metadata                    |
+
+### Generic Type Support
+
+The content result can be typed using TypeScript generics:
+
+```ts
+const page = await nexus.content.getPage<PageType>("home");
+```
+
+---
+
+# Get Collection
+
+Fetch a collection of content.
+
+```ts
+const posts = await nexus.content.getCollection<PostType>("posts", {
+  page: 1,
+  limit: 10,
+  sort: "publishedAt",
+  order: "desc",
+  filter: {
+    status: "published",
+  },
+  search: "release",
+});
+```
+
+### Parameters
+
+```text
+collection
+options
+```
+
+### Collection Options
+
+| Option   | Example                   | Description            |
+| -------- | ------------------------- | ---------------------- |
+| `page`   | `1`                       | Requested page         |
+| `limit`  | `10`                      | Number of records      |
+| `sort`   | `"publishedAt"`           | Field used for sorting |
+| `order`  | `"desc"`                  | Sort direction         |
+| `filter` | `{ status: "published" }` | Content filtering      |
+| `search` | `"release"`               | Search query           |
+
+### Example
+
+```ts
+const posts = await nexus.content.getCollection<PostType>("posts", {
+  page: 1,
+  limit: 10,
+  sort: "publishedAt",
+  order: "desc",
+  filter: {
+    status: "published",
+  },
+  search: "release",
+});
+```
+
+---
+
+# Get Globals
+
+Fetch global platform content.
+
+The globals API uses an options object rather than a key string.
+
+```ts
+const globals = await nexus.content.getGlobals({
+  include: ["navigation", "footer", "theme"],
+  revalidate: false,
+});
+```
+
+### Options
+
+| Option       | Description                               |
+| ------------ | ----------------------------------------- |
+| `include`    | List of global content groups to retrieve |
+| `revalidate` | Cache revalidation configuration          |
+
+Example:
+
+```ts
+const globals = await nexus.content.getGlobals({
+  include: [
+    "navigation",
+    "footer",
+    "theme",
+  ],
+  revalidate: false,
+});
+```
+
+---
+
+# Get Item
+
+Fetch a single item from a collection by ID.
+
+```ts
+const item = await nexus.content.getItem<ItemType>(
+  "posts",
+  "item_123"
+);
+```
+
+### Parameters
+
+```text
+collection
+itemId
+```
+
+Example:
+
+```ts
+const item = await nexus.content.getItem<PostType>(
+  "posts",
+  "item_123"
+);
+```
+
+---
+
+# Search Content
+
+Search across GN-Apex content.
+
+The search API takes the query first and options second.
+
+```ts
+const results = await nexus.content.search<PostType>(
+  "release notes",
+  {
+    collections: [
+      "posts",
+      "changelogs",
+    ],
+    limit: 20,
+  }
+);
+```
+
+### Search Options
+
+| Option        | Description                        |
+| ------------- | ---------------------------------- |
+| `collections` | Collections included in the search |
+| `limit`       | Maximum number of results          |
+
+### Example
+
+```ts
+const results = await nexus.content.search<PostType>(
+  "release notes",
+  {
+    collections: ["posts", "changelogs"],
+    limit: 20,
+  }
+);
+```
+
+---
+
+# Analytics Engine API
+
+The GN-Apex Analytics Engine provides application and user behavior tracking.
+
+The analytics system supports automatic and manual tracking.
+
+---
+
+## Automatic Tracking
+
+Automatic tracking monitors:
+
+* Page views
+* SPA navigation
+* Clicks
+* Dead clicks
+* Rage clicks
+* Scroll depth
+* Web Vitals
+* Errors
+
+These events are monitored by the SDK's analytics runtime.
+
+---
+
+# Manual Tracking
+
+Custom application events can be tracked manually.
+
+```ts
+nexus.analytics?.track(
+  "button_click",
+  {
+    buttonId: "cta_hero",
+  }
+);
+```
+
+### Example
+
+```ts
+nexus.analytics?.track("button_click", {
+  buttonId: "cta_hero",
+});
+```
+
+Custom event properties can be supplied through the event payload.
+
+---
+
+# Identify
+
+Associate analytics activity with a user.
+
+```ts
+await nexus.analytics?.identify(
+  "usr_123",
+  {
+    email: "user@domain.com",
+    plan: "pro",
+  }
+);
+```
+
+Example:
+
+```ts
+await nexus.analytics?.identify("usr_123", {
+  email: "user@domain.com",
+  plan: "pro",
+});
+```
+
+---
+
+# Group
+
+Associate a user with an organization, account, or group.
+
+```ts
+await nexus.analytics?.group(
+  "org_456",
+  {
+    tier: "enterprise",
+  }
+);
+```
+
+Example:
+
+```ts
+await nexus.analytics?.group("org_456", {
+  tier: "enterprise",
+});
+```
+
+---
+
+# Alias
+
+Create an analytics identity alias.
+
+```ts
+await nexus.analytics?.alias("usr_123");
+```
+
+---
+
+# Purchase Tracking
+
+Purchase events use a strict contract.
+
+```ts
+nexus.analytics?.trackPurchase({
+  orderId: "ord_999",
+  total: 129.99,
+  revenue: 129.99,
+  currency: "USD",
+  products: [
+    {
+      id: "prod_1",
+      name: "Pro Subscription",
+      price: 129.99,
+      quantity: 1,
+      sku: "PRO-YEAR",
+    },
+  ],
+});
+```
+
+### Purchase Fields
+
+| Field      | Example     | Description             |
+| ---------- | ----------- | ----------------------- |
+| `orderId`  | `"ord_999"` | Unique order identifier |
+| `total`    | `129.99`    | Order total             |
+| `revenue`  | `129.99`    | Recorded revenue        |
+| `currency` | `"USD"`     | Currency code           |
+| `products` | `[...]`     | Purchased products      |
+
+### Product Fields
+
+```ts
+{
+  id: "prod_1",
+  name: "Pro Subscription",
+  price: 129.99,
+  quantity: 1,
+  sku: "PRO-YEAR"
+}
+```
+
+---
+
+# Session Control
+
+Reset the analytics session or identity.
+
+```ts
+nexus.analytics?.reset(true);
+```
+
+Passing `true` requests a GDPR-compliant server scrub.
+
+```ts
+nexus.analytics?.reset(true);
+```
+
+---
+
+# Authentication API
+
+The React SDK provides authentication through the `useNexusAuth` hook.
+
+Import it from:
+
+```ts
+import { useNexusAuth } from "@gnapex/sdk/react";
+```
+
+## Authentication Hook
+
+```tsx
+import { useNexusAuth } from "@gnapex/sdk/react";
+
+function AuthComponent() {
+  const {
+    user,
+    login,
+    register,
+    logout,
+    updateProfile,
+    isAuthenticated,
+    isLoading,
+    error,
+  } = useNexusAuth();
+
+  // ...
+}
+```
+
+### Exposed Values
+
+| Value             | Purpose                                 |
+| ----------------- | --------------------------------------- |
+| `user`            | Current authenticated user              |
+| `login`           | Authentication/login operation          |
+| `register`        | User registration operation             |
+| `logout`          | Sign-out operation                      |
+| `updateProfile`   | Update the authenticated user's profile |
+| `isAuthenticated` | Authentication state                    |
+| `isLoading`       | Authentication loading state            |
+| `error`           | Authentication error state              |
+
+---
+
+# React UI & Field Renderers
+
+GN-Apex provides reusable React components for rendering GN-Apex content and common field types.
+
+Import these components from:
+
+```ts
+import {
+  NexusRenderer,
+  NexusRichText,
+  NexusLongText,
+  NexusIcon,
+  NexusImage,
+  NexusGallery,
+  NexusVideo,
+  NexusMap,
+  NexusCode,
+  NexusColor,
+  NexusKeyValue,
+  NexusTags,
+  NexusProgress,
+  NexusBoolean,
+  NexusAddress,
+  NexusGradient,
+} from "@gnapex/sdk/react";
+```
+
+---
+
+## NexusRenderer
+
+Comprehensive document renderer.
+
+```tsx
+<NexusRenderer
+  content={htmlString}
+  hydrateCharts
+  enableImageInteraction
+/>
+```
+
+Features:
+
+* Document rendering
+* Built-in DOM sanitization
+* SVG chart hydration
+* Image interaction support
+
+---
+
+## NexusRichText
+
+Specialized rich-text renderer.
+
+```tsx
+<NexusRichText
+  value={htmlString}
+  hydrateCharts
+/>
+```
+
+---
+
+## NexusLongText
+
+Safe whitespace-preserving text renderer.
+
+```tsx
+<NexusLongText
+  value={textString}
+/>
+```
+
+---
+
+## NexusIcon
+
+Dynamic Lucide icon mapper.
+
+```tsx
+<NexusIcon
+  name="ArrowRight"
+  size={18}
+/>
+```
+
+---
+
+## NexusImage
+
+Optimized image renderer.
+
+```tsx
+<NexusImage
+  value={imgObjOrUrl}
+  alt="Hero image"
+/>
+```
+
+Features:
+
+* Image URL/object support
+* Lazy loading
+* Alt text support
+
+---
+
+## NexusGallery
+
+Responsive square-grid image gallery.
+
+```tsx
+<NexusGallery
+  value={imgArray}
+/>
+```
+
+---
+
+## NexusVideo
+
+Video renderer supporting multiple video sources.
+
+```tsx
+<NexusVideo
+  value={videoUrl}
+  autoplay={false}
+/>
+```
+
+Supports:
+
+* MP4
+* YouTube
+* Vimeo
+
+---
+
+## NexusMap
+
+Interactive location map.
+
+```tsx
+<NexusMap
+  value={{
+    lat: 37.77,
+    lng: -122.41,
+    address: "San Francisco",
+  }}
+/>
+```
+
+---
+
+## NexusCode
+
+Code block renderer.
+
+```tsx
+<NexusCode
+  value={codeString}
+  language="typescript"
+  showLineNumbers
+/>
+```
+
+Features:
+
+* Monospace code display
+* Syntax language configuration
+* Line numbers
+* One-click clipboard copying
+
+---
+
+## NexusColor
+
+Color value renderer.
+
+```tsx
+<NexusColor
+  value="#00D4FF"
+  showHexLabel
+/>
+```
+
+---
+
+## NexusKeyValue
+
+Structured specification table.
+
+```tsx
+<NexusKeyValue
+  value={{
+    OS: "Linux",
+    RAM: "32GB",
+  }}
+/>
+```
+
+---
+
+## NexusTags
+
+Tag badge list.
+
+```tsx
+<NexusTags
+  value={[
+    "Tech",
+    "Release",
+  ]}
+/>
+```
+
+---
+
+## NexusProgress
+
+Progress indicator.
+
+```tsx
+<NexusProgress
+  value={75}
+  max={100}
+/>
+```
+
+---
+
+## NexusBoolean
+
+Boolean/status renderer.
+
+```tsx
+<NexusBoolean
+  value={true}
+  trueLabel="Live"
+  falseLabel="Draft"
+/>
+```
+
+Provides a status badge with a pulsing indicator.
+
+---
+
+## NexusAddress
+
+Address display card.
+
+```tsx
+<NexusAddress
+  value={{
+    street: "123 Main St",
+    city: "Dar es Salaam",
+  }}
+/>
+```
+
+The component provides an address display with a map-pin icon.
+
+---
+
+## NexusGradient
+
+Gradient container or masked-text renderer.
+
+```tsx
+<NexusGradient
+  value="linear-gradient(...)"
+  asTextMask
+/>
+```
+
+The `asTextMask` option enables gradient text masking.
+
+---
+
+# HTTP Pipeline & Resilience
+
+The SDK HTTP pipeline is exposed through:
+
+```ts
+nexus.http
+```
+
+The HTTP layer manages outgoing SDK requests.
+
+---
+
+## Request Headers
+
+The SDK automatically injects:
+
+```text
+X-Nexus-Request-ID
+X-Nexus-Client
+X-Nexus-Project
+```
+
+### `X-Nexus-Request-ID`
+
+Provides a request identifier for request tracing.
+
+### `X-Nexus-Client`
+
+Identifies the GN-Apex SDK client.
+
+### `X-Nexus-Project`
+
+Identifies the GN-Apex project associated with the request.
+
+---
+
+# Rate Limiting
+
+The SDK HTTP pipeline uses the following client-side request limits:
+
+```text
+Normal mode: 100 requests/minute
+Debug mode:  200 requests/minute
+```
+
+---
+
+# Retry Strategy
+
+The HTTP pipeline supports automatic retries.
+
+The retry mechanism uses:
+
+* Exponential backoff
+* Jitter
+* Maximum of 3 retries
+
+The jitter helps prevent synchronized retry storms when multiple clients experience failures simultaneously.
+
+---
+
+# Circuit Breaker
+
+The circuit breaker trips after:
+
+```text
+5 consecutive failures
+```
+
+The following failures count toward the circuit breaker:
+
+* HTTP 5xx responses
+* HTTP 429 responses
+* Request timeouts
+
+Client errors such as `404` do not trip the circuit breaker.
+
+### Circuit-Breaker Rule
+
+```text
+5xx      → counts
+429      → counts
+Timeout  → counts
+404      → ignored
+Other 4xx client errors → ignored
+```
+
+---
+
+# Push Notifications
+
+The SDK provides a push notification client.
+
+Import:
+
+```ts
+import { NexusPushClient } from "@gnapex/sdk";
+```
+
+Create a push client using the current GN-Apex configuration:
+
+```ts
+const push = new NexusPushClient(
+  nexus.getConfig()
+);
+```
+
+Request a push subscription:
+
+```ts
+await push.requestSubscription("/sw.js");
+```
+
+### Complete Example
+
+```ts
+import {
+  nexus,
+  NexusPushClient,
+} from "@gnapex/sdk";
+
+const push = new NexusPushClient(
+  nexus.getConfig()
+);
+
+await push.requestSubscription("/sw.js");
+```
+
+The service-worker path is supplied to `requestSubscription()`.
+
+---
+
+# CLI Toolbelt
+
+The GN-Apex CLI provides commands for local development, synchronization, validation, type generation, deployment, and diagnostics.
+
+Available CLI commands:
+
+```text
+apex init
+apex pull
+apex push
+apex diff
+apex validate
+apex types
+apex studio
+apex deploy
+apex doctor
+```
+
+The CLI is available through the `apex` binary.
+
+---
+
+# CLI Command Reference
+
+## `apex init`
+
+Scaffold a GN-Apex environment and credentials.
+
+```bash
+npx apex init
+```
+
+Purpose:
+
+* Initialize a GN-Apex project
+* Scaffold the required environment
+* Configure credentials
+
+---
+
+## `apex pull`
+
+Download remote schema and content.
+
+```bash
+npx apex pull
+```
+
+Remote content is pulled into:
+
+```text
+.nexus/local/*.nx
+```
+
+---
+
+## `apex push`
+
+Upload and publish local schema and binary content.
+
+```bash
+npx apex push
+```
+
+Purpose:
+
+* Upload local schema
+* Upload local content
+* Upload binary content
+* Publish changes
+
+---
+
+## `apex diff`
+
+Compare local state against the upstream origin.
+
+```bash
+npx apex diff
+```
+
+The comparison follows a Git-like diff model against:
+
+```text
+origin.nx
+```
+
+---
+
+## `apex validate`
+
+Validate local data against the local schema.
+
+```bash
+npx apex validate
+```
+
+The validation target is:
+
+```text
+schema.nx
+```
+
+---
+
+## `apex types`
+
+Generate TypeScript interfaces.
+
+```bash
+npx apex types
+```
+
+Generated interfaces are written to:
+
+```text
+types/nexus.d.ts
+```
+
+---
+
+## `apex studio`
+
+Start the local visual editor.
+
+```bash
+npx apex studio
+```
+
+The local Studio interface runs at:
+
+```text
+http://localhost:4646
+```
+
+---
+
+## `apex deploy`
+
+Build and transfer the deployment bundle to GN-Apex Edge.
+
+```bash
+npx apex deploy
+```
+
+The deployment workflow:
+
+1. Builds the deployment bundle.
+2. Transfers the bundle to GN-Apex Edge.
+
+---
+
+## `apex doctor`
+
+Check SDK health and environment readiness.
+
+```bash
+npx apex doctor
+```
+
+Use this command when diagnosing:
+
+* SDK environment problems
+* Configuration issues
+* Development environment readiness
+* GN-Apex SDK health
+
+---
+
+# CLI Quick Reference
+
+| Command             | Purpose                                 |
+| ------------------- | --------------------------------------- |
+| `npx apex init`     | Initialize environment and credentials  |
+| `npx apex pull`     | Download remote schema and content      |
+| `npx apex push`     | Upload and publish local schema/content |
+| `npx apex diff`     | Compare local state with upstream       |
+| `npx apex validate` | Validate local data against schema      |
+| `npx apex types`    | Generate TypeScript interfaces          |
+| `npx apex studio`   | Start local visual editor               |
+| `npx apex deploy`   | Build and deploy to GN-Apex Edge        |
+| `npx apex doctor`   | Diagnose SDK/environment readiness      |
+
+---
+
+# Production Usage Guidelines
+
+## Use the SDK Package
+
+Applications should import functionality from the documented public package entry points.
+
+```ts
+import { nexus } from "@gnapex/sdk";
+```
+
+React applications should use:
+
+```ts
+import { useNexusAuth } from "@gnapex/sdk/react";
+```
+
+---
+
+## Use Isolated Clients When Required
+
+When an application requires custom project configuration or multiple independent clients, use:
+
+```ts
+createNexusClient()
+```
+
+Example:
+
+```ts
+const client = createNexusClient({
+  projectId: "project-id",
+  apiKey: "nx_pk_client_key",
+  apiUrl: "https://api.gnapex.com",
+});
+```
+
+---
+
+## Use TypeScript Generics
+
+When the application knows the expected content shape, provide a TypeScript generic.
+
+```ts
+const page =
+  await nexus.content.getPage<PageType>("home");
+```
+
+Collection example:
+
+```ts
+const posts =
+  await nexus.content.getCollection<PostType>("posts");
+```
+
+Search example:
+
+```ts
+const results =
+  await nexus.content.search<PostType>(
+    "release notes"
+  );
+```
+
+This allows application code to retain strong typing around content responses.
+
+---
+
+## Content Caching
+
+The Content Engine supports revalidation options.
+
+Example:
+
+```ts
+const page = await nexus.content.getPage("home", {
+  revalidate: 60,
+});
+```
+
+Disable revalidation where supported by using:
+
+```ts
+revalidate: false
+```
+
+Example:
+
+```ts
+const globals = await nexus.content.getGlobals({
+  revalidate: false,
+});
+```
+
+---
+
+## Content Refresh
+
+When fresh content is required, use:
+
+```ts
+forceRefresh: true
+```
+
+Example:
+
+```ts
+const page = await nexus.content.getPage("home", {
+  forceRefresh: true,
+});
+```
+
+---
+
+# AI Coding Assistant Rules
+
+This section is specifically intended for AI coding assistants such as:
+
+* Claude
+* ChatGPT
+* GitHub Copilot
+* Cursor
+* Windsurf
+* Other coding agents
+
+AI assistants should treat this document as the primary GN-Apex SDK reference when this document corresponds to the installed SDK version.
+
+---
+
+## Rule 1 — Prefer Public APIs
+
+Use documented public APIs such as:
+
+```ts
+nexus.content.getPage()
+nexus.content.getCollection()
+nexus.content.getGlobals()
+nexus.content.getItem()
+nexus.content.search()
+```
+
+Do not invent undocumented methods.
+
+---
+
+## Rule 2 — Preserve API Signatures
+
+For content search, the query comes first:
+
+```ts
+nexus.content.search(
+  "release notes",
+  options
+);
+```
+
+Do not reverse the arguments.
+
+---
+
+## Rule 3 — Globals Use an Options Object
+
+Use:
+
+```ts
+nexus.content.getGlobals({
+  include: ["navigation", "footer", "theme"],
+});
+```
+
+Do not assume that globals require a string key argument unless the actual SDK version explicitly documents such an API.
+
+---
+
+## Rule 4 — Use Correct React Entry Point
+
+React-specific APIs should be imported from:
+
+```ts
+@gnapex/sdk/react
+```
+
+Example:
+
+```ts
+import { useNexusAuth } from "@gnapex/sdk/react";
+```
+
+---
+
+## Rule 5 — Preserve Type Safety
+
+When content types are known, use generics:
+
+```ts
+nexus.content.getPage<PageType>("home");
+```
+
+rather than unnecessarily falling back to untyped values.
+
+---
+
+## Rule 6 — Do Not Invent Component Props
+
+Only use documented props unless the installed SDK source/types explicitly confirm additional properties.
+
+For example:
+
+```tsx
+<NexusImage
+  value={imgObjOrUrl}
+  alt="Hero image"
+/>
+```
+
+Do not invent unsupported properties.
+
+---
+
+## Rule 7 — Preserve Analytics Contracts
+
+Purchase tracking must follow the documented structure:
+
+```ts
+nexus.analytics?.trackPurchase({
+  orderId: "ord_999",
+  total: 129.99,
+  revenue: 129.99,
+  currency: "USD",
+  products: [
+    {
+      id: "prod_1",
+      name: "Pro Subscription",
+      price: 129.99,
+      quantity: 1,
+      sku: "PRO-YEAR",
+    },
+  ],
+});
+```
+
+---
+
+## Rule 8 — Respect Optional Analytics
+
+The SDK examples use optional chaining:
+
+```ts
+nexus.analytics?.track(...)
+```
+
+and:
+
+```ts
+await nexus.analytics?.identify(...)
+```
+
+Preserve this behavior when working with code that treats analytics as optional.
+
+---
+
+## Rule 9 — Do Not Bypass the HTTP Pipeline
+
+SDK requests should use the SDK's HTTP pipeline where the corresponding SDK API provides that behavior.
+
+The HTTP pipeline is responsible for:
+
+* Request identification
+* Client identification
+* Project identification
+* Rate limiting
+* Retries
+* Backoff
+* Circuit breaking
+
+---
+
+## Rule 10 — Respect Runtime Requirements
+
+The SDK requires:
+
+```text
+Node.js >= 18
+```
+
+React integrations require:
+
+```text
+React 18.2+
+React 19
+```
+
+AI-generated integrations should not intentionally target unsupported runtime versions.
+
+---
+
+# Compatibility
+
+## Node.js
+
+Minimum supported runtime:
+
+```text
+Node.js 18
+```
+
+Therefore:
+
+```text
+Node.js >= 18
+```
+
+---
+
+## React
+
+Supported React versions:
+
+```text
+React 18.2+
+React 19
+```
+
+---
+
+## TypeScript
+
+The SDK is designed for TypeScript/JavaScript applications.
+
+TypeScript users should take advantage of the generic content APIs:
+
+```ts
+getPage<PageType>()
+getCollection<PostType>()
+getItem<ItemType>()
+search<PostType>()
+```
+
+---
+
+# Complete Integration Example
+
+The following example demonstrates a basic GN-Apex content integration:
+
+```ts
+import {
+  nexus,
+  createNexusClient,
+} from "@gnapex/sdk";
+
+interface Post {
+  id: string;
+  title: string;
+  publishedAt: string;
+}
+
+const client = createNexusClient({
+  projectId: "project-id",
+  apiKey: "nx_pk_client_key",
+  apiUrl: "https://api.gnapex.com",
+});
+
+async function loadContent() {
+  const page =
+    await client.content.getPage("home", {
+      revalidate: 60,
+      tags: ["content_home"],
+      forceRefresh: false,
+      includeMetadata: false,
+    });
+
+  const posts =
+    await client.content.getCollection<Post>(
+      "posts",
+      {
+        page: 1,
+        limit: 10,
+        sort: "publishedAt",
+        order: "desc",
+        filter: {
+          status: "published",
+        },
+      }
+    );
+
+  return {
+    page,
+    posts,
+  };
+}
+```
+
+---
+
+# Complete Analytics Example
+
+```ts
+import { nexus } from "@gnapex/sdk";
+
+async function trackUserActivity() {
+  nexus.analytics?.track(
+    "button_click",
+    {
+      buttonId: "cta_hero",
+    }
+  );
+
+  await nexus.analytics?.identify(
+    "usr_123",
+    {
+      email: "user@domain.com",
+      plan: "pro",
+    }
+  );
+
+  await nexus.analytics?.group(
+    "org_456",
+    {
+      tier: "enterprise",
+    }
+  );
+}
+```
+
+---
+
+# Complete Purchase Example
+
+```ts
+import { nexus } from "@gnapex/sdk";
+
+function trackPurchase() {
+  nexus.analytics?.trackPurchase({
+    orderId: "ord_999",
+    total: 129.99,
+    revenue: 129.99,
+    currency: "USD",
+    products: [
+      {
+        id: "prod_1",
+        name: "Pro Subscription",
+        price: 129.99,
+        quantity: 1,
+        sku: "PRO-YEAR",
+      },
+    ],
+  });
+}
+```
+
+---
+
+# Complete React Authentication Example
+
+```tsx
+import { useNexusAuth } from "@gnapex/sdk/react";
+
+export function AuthComponent() {
+  const {
+    user,
+    login,
+    register,
+    logout,
+    updateProfile,
+    isAuthenticated,
+    isLoading,
+    error,
+  } = useNexusAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div>
+        <button onClick={() => login()}>
+          Login
+        </button>
+
+        <button onClick={() => register()}>
+          Register
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p>
+        Welcome {user?.email}
+      </p>
+
+      <button onClick={() => logout()}>
+        Logout
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+# Complete Push Notification Example
+
+```ts
+import {
+  nexus,
+  NexusPushClient,
+} from "@gnapex/sdk";
+
+async function enablePushNotifications() {
+  const push = new NexusPushClient(
+    nexus.getConfig()
+  );
+
+  await push.requestSubscription(
+    "/sw.js"
+  );
+}
+```
+
+---
+
+# CLI Quick Start
+
+Initialize a project:
+
+```bash
+npx apex init
+```
+
+Pull remote content:
+
+```bash
+npx apex pull
+```
+
+Validate local content:
+
+```bash
+npx apex validate
+```
+
+Generate TypeScript types:
+
+```bash
+npx apex types
+```
+
+Compare local and remote state:
+
+```bash
+npx apex diff
+```
+
+Start GN-Apex Studio:
+
+```bash
+npx apex studio
+```
+
+Push changes:
+
+```bash
+npx apex push
+```
+
+Deploy:
+
+```bash
+npx apex deploy
+```
+
+Run diagnostics:
+
+```bash
+npx apex doctor
+```
+
+---
+
+# API Summary
+
+## Core
+
+```ts
+nexus
+createNexusClient()
+```
+
+## Content
+
+```ts
+nexus.getPage()
+nexus.content.getPage()
+nexus.content.getCollection()
+nexus.content.getGlobals()
+nexus.content.getItem()
+nexus.content.search()
+```
+
+## Analytics
+
+```ts
+nexus.analytics?.track()
+nexus.analytics?.identify()
+nexus.analytics?.group()
+nexus.analytics?.alias()
+nexus.analytics?.trackPurchase()
+nexus.analytics?.reset()
+```
+
+## Authentication
+
+```ts
+useNexusAuth()
+```
+
+## Rendering
+
+```tsx
+<NexusRenderer />
+<NexusRichText />
+<NexusLongText />
+<NexusIcon />
+<NexusImage />
+<NexusGallery />
+<NexusVideo />
+<NexusMap />
+<NexusCode />
+<NexusColor />
+<NexusKeyValue />
+<NexusTags />
+<NexusProgress />
+<NexusBoolean />
+<NexusAddress />
+<NexusGradient />
+```
+
+## Push
+
+```ts
+NexusPushClient
+```
+
+## CLI
+
+```bash
+apex init
+apex pull
+apex push
+apex diff
+apex validate
+apex types
+apex studio
+apex deploy
+apex doctor
+```
+
+---
+
+# Stability & Reference Policy
+
+This document should describe the **actual public SDK contract**.
+
+When updating the SDK:
+
+1. Update this reference when a public API changes.
+2. Keep examples synchronized with the implementation.
+3. Do not document APIs that do not exist in the released package.
+4. Do not remove existing API documentation without confirming a breaking change.
+5. Keep TypeScript signatures synchronized with the published type declarations.
+6. Keep CLI commands synchronized with the actual CLI.
+7. Update compatibility requirements when runtime support changes.
+8. Clearly document breaking changes.
+9. Keep authentication, analytics, content, and rendering contracts explicit.
+10. Treat the published SDK types and implementation as the final verification source when this document and the installed package differ.
+
+---
+
+# Versioning
+
+The SDK follows semantic versioning:
+
+```text
+MAJOR.MINOR.PATCH
+```
+
+Changes should be classified appropriately:
+
+* **MAJOR** — breaking API changes
+* **MINOR** — backward-compatible functionality
+* **PATCH** — backward-compatible fixes
+
+When a breaking API change occurs, this document should be updated to reflect the new contract.
+
+---
+
+# License
+
+GN-Apex SDK is distributed under the MIT License.
+
+```text
+MIT
+```
+
+---
+
+# GN-Apex SDK Reference
+
+**Package**
+
+```text
+@gnapex/sdk
+```
+
+**React**
+
+```text
+@gnapex/sdk/react
+```
+
+**CLI**
+
+```text
+apex
+nexus
+```
+
+**Runtime**
+
+```text
+Node.js >= 18
+```
+
+**React**
+
+```text
+React 18.2+
+React 19
+```
+
+**License**
+
+```text
+MIT
+```
+
+This document serves as the GN-Apex SDK AI/developer reference and should be kept synchronized with the released SDK implementation and public type definitions.
