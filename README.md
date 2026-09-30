@@ -51,6 +51,9 @@ If you are looking for how to fetch a page, track an event, gate a feature flag,
 - [Configuration](#configuration)
 - [React integration](#react-integration)
 - [API reference](#api-reference)
+  - [Workspace Modes & Autonomous Dynamic Portals](#workspace-modes--autonomous-dynamic-portals)
+  - [Schema-Driven AI Copilot](#schema-driven-ai-copilot)
+  - [Composable Contact Forms](#composable-contact-forms-gnapexsdkreact)
   - [Content](#content-api)
   - [Analytics](#analytics-api)
   - [Auth](#auth-api)
@@ -377,6 +380,177 @@ import { NexusRenderer } from "@gnapex/sdk/react";
 Content passed to `NexusRenderer` is sanitized before DOM insertion (script tags, `javascript:` URLs, and inline event handlers are stripped) — see [`SECURITY.md`](./SECURITY.md) for the exact scope of that guarantee.
 
 ## API reference
+
+### Workspace Modes & Autonomous Dynamic Portals
+
+GN-Apex decouples portal structure from deployment. Instead of requiring developers to build and redeploy separate Next.js applications for every school, NGO, or clinic, **portals are driven entirely by dynamic schema data**.
+
+#### How Dynamic Portals Work
+
+1. **Developer deploys once:** The developer places `<NexusPortalPage />` inside `app/portal/[[...slug]]/page.tsx`.
+2. **Client owns and manages:** The Client (Project Owner) selects templates (e.g. _"Modern Minimal"_, _"Academic"_, _"Impact Donor"_), reorders sections, customizes brand colors, and toggles pages directly in their GN-Apex Dashboard.
+3. **Zero-Code Edge Hydration:** When a visitor opens `/portal/results` or `/portal/donations`, the edge worker fetches the project's `render-config` and dynamically renders the client's exact layout array and design tokens.
+
+```tsx
+// app/portal/[[...slug]]/page.tsx (Written once by developer)
+"use client";
+
+import { NexusPortalPage } from "@gnapex/sdk/react";
+
+export default function UniversalPortalRouter() {
+  return <NexusPortalPage />;
+}
+```
+
+#### Server-side SEO for Portal Pages
+
+```tsx
+// app/portal/[[...slug]]/page.tsx
+import { generateWorkspaceMetadata } from "@gnapex/sdk/react";
+import { nexus } from "@gnapex/sdk";
+
+export async function generateMetadata({ params }) {
+  const config = await nexus.workspace.getRenderConfig();
+  return generateWorkspaceMetadata(params.slug?.[0] || "home", config);
+}
+```
+
+### Schema-Driven AI Copilot
+
+GN-Apex includes a zero-bloat, decoupled AI Copilot that projects can enable without adding heavy chat libraries to their codebase.
+
+- **Zero SDK Overhead:** The core SDK contains no heavy Markdown parsers or chat components.
+- **Auto-Injected via CDN:** When the client enables the Copilot in their GN-Apex Dashboard, `<NexusProvider>` automatically loads the lightweight widget into an isolated browser **Shadow DOM** (`cdn.gnapex.com/copilot.js`).
+- **100% Client-Customizable:** The client configures the avatar, welcome greeting, brand colors, and suggested prompt questions directly in their dashboard.
+
+```tsx
+// Programmatic Copilot Control (Optional)
+import { useNexusCopilot } from "@gnapex/sdk/react";
+
+export function HelpButton() {
+  const { open, toggle } = useNexusCopilot();
+  return <button onClick={toggle}>Ask AI Assistant</button>;
+}
+```
+
+### Composable Contact Forms (`@gnapex/sdk/react`)
+
+GN-Apex provides a **shadcn-style compound form system** that routes inquiries directly to your project's **Sovereign Omnichannel Inbox**.
+
+Every submission automatically:
+
+- 🛡️ **Blocks Bots Silently:** Uses an invisible honeypot trap to eliminate spam without annoying CAPTCHAs.
+- ⚡ **Validates Client-Side:** Checks email syntax, message length, and required fields before sending.
+- 💬 **Creates Realtime Inbox Threads:** Instantly appears in your GN-Apex Dashboard via WebSockets.
+- 📊 **Tracks Telemetry:** Automatically fires a `form_submit` event in your analytics pipeline.
+
+#### Quick Start Example
+
+```tsx
+"use client";
+
+import {
+  NexusContactForm,
+  NexusContactName,
+  NexusContactEmail,
+  NexusContactPhone,
+  NexusContactAddress,
+  NexusContactMessage,
+  NexusContactCustomField,
+  NexusContactSubmit,
+  NexusContactFeedback,
+} from "@gnapex/sdk/react";
+
+export function ContactSection() {
+  return (
+    <NexusContactForm
+      formId="website-inquiries" // Maps to your form endpoint in GN-Apex Inbox
+      onSuccess={(res) => console.log("Delivered to inbox:", res.message)}
+      className="max-w-lg mx-auto space-y-4 p-8 rounded-3xl bg-neutral-900 border border-white/10"
+    >
+      {/* Full Name */}
+      <NexusContactName placeholder="Juma Hamisi" required />
+
+      {/* Email & Phone Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <NexusContactEmail placeholder="juma@example.com" required />
+        <NexusContactPhone
+          placeholder="+255 755 123 456"
+          askWhatsapp
+          whatsappLabel="WhatsApp active"
+        />
+      </div>
+
+      {/* Dynamic Custom Field (Saved to Lead Metadata) */}
+      <NexusContactCustomField
+        fieldKey="organization"
+        label="Organization / School / NGO"
+        placeholder="Tanzania Media Foundation"
+      />
+
+      {/* Physical Location */}
+      <NexusContactAddress placeholder="Dar es Salaam, Tanzania" />
+
+      {/* Inquiry Message Body */}
+      <NexusContactMessage
+        rows={4}
+        placeholder="How can our team assist your organization?"
+        required
+      />
+
+      {/* Success / Error Notification Banner */}
+      <NexusContactFeedback />
+
+      {/* Submit Button */}
+      <NexusContactSubmit
+        className="w-full bg-linear-to-r from-cyan-500 to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:opacity-90 transition-all cursor-pointer"
+        loadingText="Encrypting & Transmitting..."
+      >
+        Send Inquiry
+      </NexusContactSubmit>
+    </NexusContactForm>
+  );
+}
+```
+
+#### Component Reference
+
+| Component                   | Props                                                                          | Description                                                                |
+| :-------------------------- | :----------------------------------------------------------------------------- | :------------------------------------------------------------------------- |
+| `<NexusContactForm>`        | `formId` (required), `projectId?`, `onSuccess?`, `onError?`, `resetOnSuccess?` | Root form container and state provider. Injects honeypot spam protection.  |
+| `<NexusContactName>`        | `label?`, `placeholder?`, `required?`, `className?`                            | Client name input with autocomplete.                                       |
+| `<NexusContactEmail>`       | `label?`, `placeholder?`, `required?`, `className?`                            | Email input with built-in regex syntax validation.                         |
+| `<NexusContactPhone>`       | `label?`, `placeholder?`, `askWhatsapp?`, `whatsappLabel?`, `required?`        | Phone number input with optional WhatsApp confirmation checkbox.           |
+| `<NexusContactAddress>`     | `label?`, `placeholder?`, `required?`, `className?`                            | Physical address / city input.                                             |
+| `<NexusContactMessage>`     | `label?`, `placeholder?`, `rows?`, `required?`, `className?`                   | Textarea for the core inquiry message (strictly required by SRE protocol). |
+| `<NexusContactCustomField>` | `fieldKey` (required), `label` (required), `placeholder?`, `required?`         | Arbitrary JSON custom field (e.g. `companyName`, `budget`, `jobTitle`).    |
+| `<NexusContactSubmit>`      | `loadingText?`, `disabled?`, `className?`                                      | Accessible submit button with built-in animated spinner when submitting.   |
+| `<NexusContactFeedback>`    | `successClassName?`, `errorClassName?`                                         | Feedback banner displaying success confirmation or validation errors.      |
+
+#### Custom Headless Usage (`useNexusFormContext`)
+
+If you want to build completely custom or unstyled forms without the built-in inputs:
+
+```tsx
+import { useNexusFormContext } from "@gnapex/sdk/react";
+
+export function CustomInputField() {
+  const { values, errors, setFieldValue, setFieldTouched, status } =
+    useNexusFormContext();
+
+  return (
+    <div>
+      <input
+        value={values.name || ""}
+        onChange={(e) => setFieldValue("name", e.target.value)}
+        onBlur={() => setFieldTouched("name")}
+        disabled={status === "submitting"}
+      />
+      {errors.name && <span className="text-red-500">{errors.name}</span>}
+    </div>
+  );
+}
+```
 
 ### Content API
 

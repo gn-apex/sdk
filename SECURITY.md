@@ -11,6 +11,28 @@ _Last updated: September 2026 — Version 1.0.0 Verified Release._
 - Request IDs (`X-Nexus-Request-ID`) are emitted on every request for end-to-end tracing.
 - Data Ingestion operates with automatic payload redaction for passwords, authorization tokens, and payment fields.
 
+## Client Sovereignty, Sandboxed Portals & Copilot Security
+
+### 1. Portal Props Boundary & Safe Dynamic Execution
+
+GN-Apex enforces a strict architectural boundary between **visual customization (client-owned)** and **core business logic (platform-enforced)**:
+
+* **The Open Gate:** Project owners (clients) have 100% autonomous control over visual themes, component ordering, CSS variables, hero text, and page layouts in their No-Code Studio.
+* **The Props Sandbox:** Every portal component strictly implements the `WorkspaceComponentProps` contract. Components only receive read-only data snapshots and pre-authorized action callbacks.
+* **Zero Arbitrary Execution:** Clients and third-party marketplace themes cannot inject raw SQL, cannot execute unauthorized database mutations, and cannot bypass payment or grading formulas.
+
+### 2. AI Copilot Isolation (Shadow DOM Security)
+
+* The GN-Apex AI Copilot executes inside a native browser **Shadow DOM** (`attachShadow`).
+* **CSS & DOM Isolation:** The host website’s scripts and styles cannot read or leak chat input streams, and the AI widget cannot interfere with or mutate the host application's DOM tree.
+* **Telemetry Protection:** Analytics tracking and chat sessions are isolated per project ID and scrubbed of sensitive credential fields before transmission.
+
+### 3. Client Ownership Model
+
+* **Infrastructure:** Developers manage deployment pipelines and Next.js hosting via `apex deploy`.
+* **Data & Feature Governance:** The Project Owner (Client) possesses exclusive ownership of all workspace schemas, portal layout arrays, design tokens, and AI persona configurations.
+* **Zero Developer Gatekeeping:** Changes published by project owners in the GN-Apex Dashboard update live edge nodes immediately via signed webhook purges (`/api/revalidate`), without requiring code commits or developer intervention.
+
 ## Resolved Security Findings
 
 | Component                              | Status       | Resolution                                                                                                                                                                                                                                                                                               |
