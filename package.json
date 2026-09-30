@@ -1,7 +1,7 @@
 {
   "name": "@gnapex/sdk",
   "private": false,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "GN-Apex zero-config production runtime SDK",
   "type": "module",
   "main": "./dist/index.cjs",
