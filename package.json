@@ -104,6 +104,7 @@
   "author": "Jom Joam - GnApex",
   "license": "MIT",
   "dependencies": {
+    "@gnapex/sdk": "^1.1.4",
     "dotenv": "^17.2.3",
     "lucide-react": "^1.21.0",
     "node-fetch": "^3.3.2",
@@ -111,10 +112,10 @@
     "web-vitals": "^5.1.0"
   },
   "peerDependencies": {
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0",
+    "@opennextjs/cloudflare": ">=1.0.0",
     "next": ">=15.0.0",
-    "@opennextjs/cloudflare": ">=1.0.0"
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
