@@ -27,10 +27,10 @@
       "default": "./dist/next.js"
     },
     "./opennext": {
-      "types": "./dist/opennext/index.d.ts",
-      "import": "./dist/opennext/index.js",
-      "require": "./dist/opennext/index.cjs",
-      "default": "./dist/opennext/index.js"
+      "types": "./dist/opennext.d.ts",
+      "import": "./dist/opennext.js",
+      "require": "./dist/opennext.cjs",
+      "default": "./dist/opennext.js"
     }
   },
   "typesVersions": {
@@ -39,10 +39,10 @@
         "./dist/react.d.ts"
       ],
       "next": [
-        "./dist/next/index.d.ts"
+        "./dist/next.d.ts"
       ],
       "opennext": [
-        "./dist/opennext/index.d.ts"
+        "./dist/opennext.d.ts"
       ]
     }
   },
@@ -54,8 +54,8 @@
     "fs": false,
     "path": false,
     "os": false,
-    "./dist/content/local-cache-server.js": "./dist/content/local-cache-client.js",
-    "./dist/content/local-cache-server.cjs": "./dist/content/local-cache-client.cjs"
+    "./dist/local-cache-server.js": "./dist/local-cache-client.js",
+    "./dist/local-cache-server.cjs": "./dist/local-cache-client.cjs"
   },
   "files": [
     "dist",
