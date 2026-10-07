@@ -1,8 +1,8 @@
 {
   "name": "@gnapex/sdk",
   "private": false,
-  "version": "1.0.5",
-  "description": "GN-Apex zero-config production runtime SDK",
+  "version": "1.1.0",
+  "description": "GN-Apex zero-config production runtime SDK with Direct Signed Revalidation",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,12 +19,30 @@
       "import": "./dist/react.js",
       "require": "./dist/react.cjs",
       "default": "./dist/react.js"
+    },
+    "./next": {
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js",
+      "require": "./dist/next/index.cjs",
+      "default": "./dist/next/index.js"
+    },
+    "./opennext": {
+      "types": "./dist/opennext/index.d.ts",
+      "import": "./dist/opennext/index.js",
+      "require": "./dist/opennext/index.cjs",
+      "default": "./dist/opennext/index.js"
     }
   },
   "typesVersions": {
     "*": {
       "react": [
         "./dist/react.d.ts"
+      ],
+      "next": [
+        "./dist/next/index.d.ts"
+      ],
+      "opennext": [
+        "./dist/opennext/index.d.ts"
       ]
     }
   },
@@ -53,7 +71,7 @@
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
     "build": "tsup && npm run build --prefix ../app/studio",
-    "dev": "tsup src/index.ts tools/cli.ts --format esm,cjs --dts --watch",
+    "dev": "tsup src/index.ts src/next/index.ts src/opennext/index.ts tools/cli.ts --format esm,cjs --dts --watch",
     "test": "jest --config jest.config.cjs",
     "test:coverage": "jest --config jest.config.cjs --coverage",
     "test:debug": "jest --config jest.config.cjs --verbose --no-coverage",
@@ -69,43 +87,48 @@
   "keywords": [
     "gn-apex",
     "gnapex",
-    "nexushub",
+    "revalidation",
+    "cache-invalidation",
+    "opennext",
+    "cloudflare-workers",
     "cms",
     "headless-cms",
-    "content-api",
-    "analytics",
-    "web-analytics",
-    "behavioral-analytics",
-    "product-analytics",
-    "feature-flags",
-    "authentication",
-    "realtime",
-    "websocket",
-    "web-push",
-    "push-notifications",
-    "content",
-    "headless",
     "nextjs",
-    "next.js",
     "react",
-    "react-sdk",
     "typescript",
     "sdk",
     "client-sdk",
-    "zero-config",
-    "runtime",
-    "edge",
-    "global-edge"
+    "nexus",
+    "nexus-hub"
   ],
   "author": "Jom Joam - GnApex",
   "license": "MIT",
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.20.7",
     "dotenv": "^17.2.3",
     "lucide-react": "^1.21.0",
     "node-fetch": "^3.3.2",
     "socket.io-client": "^4.8.3",
     "web-vitals": "^5.1.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0",
+    "next": ">=15.0.0",
+    "@opennextjs/cloudflare": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "@opennextjs/cloudflare": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -128,6 +151,7 @@
     "eslint-config-next": "16.1.1",
     "figlet": "^1.11.0",
     "fs-extra": "^11.3.3",
+    "glob": "^11.0.1",
     "gradient-string": "^3.0.0",
     "inquirer": "^14.0.2",
     "jest": "^30.2.0",
@@ -140,11 +164,12 @@
     "typescript": "^5.9.3",
     "wrangler": "^4.105.0"
   },
-  "peerDependencies": {
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
-  },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "overrides": {
+    "braces": "^3.0.3",
+    "sprintf-js": "^1.1.3",
+    "sharp": "^0.35.5"
   }
 }
