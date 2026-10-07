@@ -1,7 +1,7 @@
 {
   "name": "@gnapex/sdk",
   "private": false,
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "GN-Apex zero-config production runtime SDK with Direct Signed Revalidation",
   "type": "module",
   "main": "./dist/index.cjs",
