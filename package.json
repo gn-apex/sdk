@@ -21,10 +21,10 @@
       "default": "./dist/react.js"
     },
     "./next": {
-      "types": "./dist/next/index.d.ts",
-      "import": "./dist/next/index.js",
-      "require": "./dist/next/index.cjs",
-      "default": "./dist/next/index.js"
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "require": "./dist/next.cjs",
+      "default": "./dist/next.js"
     },
     "./opennext": {
       "types": "./dist/opennext/index.d.ts",
