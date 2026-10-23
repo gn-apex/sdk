@@ -1,7 +1,7 @@
 {
   "name": "@gnapex/sdk",
   "private": false,
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "GN-Apex zero-config production runtime SDK with Direct Signed Revalidation",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -90,6 +90,7 @@
     "revalidation",
     "cache-invalidation",
     "opennext",
+    "vercel",
     "cloudflare-workers",
     "cms",
     "headless-cms",
@@ -104,10 +105,7 @@
   "author": "Jom Joam - GnApex",
   "license": "MIT",
   "dependencies": {
-    "@gnapex/sdk": "^1.1.4",
-    "dotenv": "^17.2.3",
     "lucide-react": "^1.21.0",
-    "node-fetch": "^3.3.2",
     "socket.io-client": "^4.8.3",
     "web-vitals": "^5.1.0"
   },
@@ -132,6 +130,8 @@
     }
   },
   "devDependencies": {
+    "dotenv": "^16.4.7",
+    "node-fetch": "^3.3.2",
     "@eslint/eslintrc": "^3",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/fs-extra": "^11.0.4",
